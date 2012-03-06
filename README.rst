@@ -13,7 +13,7 @@ What I need.
 
 To use savi2mkv, you need at least:
 
-* Python (>=2.7)
+* Python (>=2.4)
 * mkvtools
 
 How to use

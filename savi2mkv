@@ -19,8 +19,10 @@
 #
 
 import logging
-from optparse import OptionParser, OptionGroup
+import os
+import subprocess
 import sys
+from optparse import OptionParser, OptionGroup
 
 
 # Global information
@@ -61,9 +63,49 @@ def shell_arguments():
     return parser
 
 
-if __name__ == 'savi2mkv':
+def check_mkvmerge():
+    'Check if mkvmerge is installed'
+    try:
+        subprocess.check_call(['mkvmerge', '-V'], stdout=subprocess.PIPE)
+    except OSError:
+        return False
+
+    return True
+
+
+def analyze_path(obj):
+    'Convert the obj file or dir'
+    ab_path = os.path.abspath(obj)
+
+    # Check if the path exists
+    if not os.path.exists(ab_path):
+        sys.stderr.write('The path "%s" doesn\'t exists\n' % obj)
+        return False
+
+    # If is a file, convert it directly; otherwise, transverse the dir
+    if os.path.isfile(ab_path):
+        convert_video(ab_path)
+    elif os.path.isdir(ab_path):
+        for f in os.listdir(ab_path):
+            if os.path.isfile(f):
+                convert_video(os.path.abspath(f))
+
+    return True
+
+
+def convert_video(fpath):
+    'Convert the AVI video to matroska'
+    logging.info('Trying to convert %s file', fpath)
+
+
+def create_command():
+    'Creathe the mkvmerge command'
+    return 'mkvmerge'
+
+
+if __name__ == '__main__':
     arg_parser = shell_arguments()
-    (options, arguments) = arg_parser.parse_args()
+    (options, paths) = arg_parser.parse_args()
 
     # Configure the logging module
     if options.verbose:
@@ -74,5 +116,16 @@ if __name__ == 'savi2mkv':
     logging.basicConfig(level=level,
         format='%(asctime)s %(levelname)s: %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S')
+
+    if not check_mkvmerge():
+        print('mkvtoolnix is not installed in your system')
+        print('You need the mkvmerge command to run this script')
+        sys.exit(-1)
+
+    # If no files are provided, use the actual directory
+    paths = paths or '.'
+
+    for path in paths:
+        analyze_path(path)
 
 # vim: ai ts=4 sts=4 et sw=4
