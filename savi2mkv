@@ -142,6 +142,7 @@ def find_subtitles(finput):
         language = f[len(finput):-4].strip()
         if language:
             languages.append([language_code(language), language, f])
+            logging.info('Found a subtitle with the name "%s"', language)
 
     return languages
 
