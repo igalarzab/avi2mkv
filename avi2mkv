@@ -2,20 +2,20 @@
 #
 #    Copyright 2012, Jose Ignacio Galarza <igalarzab@gmail.com>.
 #
-#    This file is part of savi2mkv.
+#    This file is part of avi2mkv.
 #
-#    savi2mkv is free software: you can redistribute it and/or modify
+#    avi2mkv is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation, either version 3 of the License, or
 #    (at your option) any later version.
 #
-#    savi2mkv is distributed in the hope that it will be useful,
+#    avi2mkv is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU General Public License for more details.
 #
 #    You should have received a copy of the GNU General Public License
-#    along with savi2mkv.  If not, see <http://www.gnu.org/licenses/>.
+#    along with avi2mkv.  If not, see <http://www.gnu.org/licenses/>.
 #
 
 import glob
@@ -27,12 +27,12 @@ from optparse import OptionParser
 
 
 # Global information
-__uname__ = 'savi2mkv'
+__uname__ = 'avi2mkv'
 __long_name__ = 'Simple AVI to MKV converter'
 __version__ = '0.1dev'
 __author__ = 'Jose Ignacio Galarza'
 __email__ = 'igalarzab@gmail.com'
-__url__ = 'http://github.com/igalarzab/savi2mkv'
+__url__ = 'http://github.com/igalarzab/avi2mkv'
 __license__ = 'GNU/GPLv3'
 
 

@@ -1,5 +1,5 @@
 ===============
-savi2mkv
+avi2mkv
 ===============
 
 What it does.
@@ -11,7 +11,7 @@ Simple script to transform an AVI video to MKV.
 What I need.
 =============
 
-To use savi2mkv, you need at least:
+To use avi2mkv, you need at least:
 
 * Python (>=2.4)
 * mkvtools
@@ -21,7 +21,7 @@ How to use
 
 To run, you only need to execute photoshare.py
 
-``$ ./savi2mkv --help``
+``$ ./avi2mkv --help``
 
 
 Author
