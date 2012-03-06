@@ -18,6 +18,7 @@
 #    along with savi2mkv.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+import glob
 import logging
 import os
 import subprocess
@@ -86,21 +87,61 @@ def analyze_path(obj):
     if os.path.isfile(ab_path):
         convert_video(ab_path)
     elif os.path.isdir(ab_path):
-        for f in os.listdir(ab_path):
-            if os.path.isfile(f):
-                convert_video(os.path.abspath(f))
+        for f in glob.glob(ab_path + '/*.avi'):
+            abs_f = os.path.join(ab_path, f)
+            if os.path.isfile(abs_f):
+                convert_video(abs_f)
 
     return True
 
 
-def convert_video(fpath):
-    'Convert the AVI video to matroska'
-    logging.info('Trying to convert %s file', fpath)
-
-
-def create_command():
+def create_command(iname, oname, subtitles):
     'Creathe the mkvmerge command'
-    return 'mkvmerge'
+    all_subtitles = ''
+
+    # Create the subtitles
+    for subtitle in subtitles:
+        if subtitle[0]:
+            all_subtitles += ' --language "0:%s"' % subtitle[0]
+        all_subtitles += ' --track-name "0:%s" "%s"' % (subtitle[1], subtitle[2])
+
+    command = 'mkvmerge -o "%s" "%s" %s' % (oname, iname, all_subtitles)
+    logging.info(command)
+    return command
+
+
+def language_code(lang):
+    'Get the language code'
+    values = {
+        'spanish': 'es',
+        'english': 'en'
+        }
+
+    return values.get(lang.lower(), None)
+
+
+def find_subtitles(finput):
+    'Find all the subtitles of the video'
+    files = glob.glob(finput + '*.srt')
+    languages = []
+
+    for f in files:
+        language = f[len(finput):-4].strip()
+        if language:
+            languages.append([language_code(language), language, f])
+
+    return languages
+
+
+def convert_video(finput):
+    'Convert the AVI video to matroska'
+    logging.info('Trying to convert %s file', finput)
+
+    finput_without_ext = os.path.splitext(finput)[0]
+    foutput = finput_without_ext + '.mkv'
+    subs = find_subtitles(finput_without_ext)
+
+    command = create_command(finput, foutput, subs)
 
 
 if __name__ == '__main__':
