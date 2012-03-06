@@ -80,7 +80,8 @@ def analyze_path(obj):
 
     # Check if the path exists
     if not os.path.exists(ab_path):
-        sys.stderr.write('The path "%s" doesn\'t exists\n' % obj)
+        write_text('[E]', sys.stdout, '31')
+        write_text(' The file "%s" doesn\'t exists\n' % obj)
         return False
 
     # If is a file, convert it directly; otherwise, transverse the dir
@@ -97,15 +98,24 @@ def analyze_path(obj):
 
 def create_command(iname, oname, subtitles):
     'Creathe the mkvmerge command'
-    all_subtitles = ''
+    command = ['mkvmerge']
+
+    # Append the output file
+    command.append('-o')
+    command.append(oname)
+
+    # Append the input file
+    command.append(iname)
 
     # Create the subtitles
     for subtitle in subtitles:
         if subtitle[0]:
-            all_subtitles += ' --language "0:%s"' % subtitle[0]
-        all_subtitles += ' --track-name "0:%s" "%s"' % (subtitle[1], subtitle[2])
+            command.append('--language')
+            command.append('0:%s' % subtitle[0])
+        command.append('--track-name')
+        command.append('0:%s' % subtitle[1])
+        command.append(subtitle[2])
 
-    command = 'mkvmerge -o "%s" "%s" %s' % (oname, iname, all_subtitles)
     logging.info(command)
     return command
 
@@ -115,7 +125,7 @@ def language_code(lang):
     values = {
         'spanish': 'es',
         'english': 'en'
-        }
+    }
 
     return values.get(lang.lower(), None)
 
@@ -142,6 +152,23 @@ def convert_video(finput):
     subs = find_subtitles(finput_without_ext)
 
     command = create_command(finput, foutput, subs)
+    write_text('[ ] Converting %s' % finput)
+    sys.stdout.flush()
+    c = subprocess.call(command, stdout=subprocess.PIPE)
+    if c == 0:
+        write_text('\r[X]\n', sys.stdout, '32')
+    else:
+        write_text('\r[E]\n', sys.stdout, '31')
+
+    sys.stdout.flush()
+
+
+def write_text(text, desc=sys.stdout, color=None):
+    'Write the text with color, if tty'
+    if color is not None and desc.isatty():
+        desc.write('\x1b[%sm%s\x1b[0m' % (color, text))
+    else:
+        desc.write(text)
 
 
 if __name__ == '__main__':
