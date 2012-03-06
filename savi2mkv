@@ -23,7 +23,7 @@ import logging
 import os
 import subprocess
 import sys
-from optparse import OptionParser, OptionGroup
+from optparse import OptionParser
 
 
 # Global information
@@ -38,29 +38,32 @@ __license__ = 'GNU/GPLv3'
 
 def show_authors(*args, **kwargs):
     'Show authors'
-    print('%s v%s, %s' % (__name__, __version__, __long_name__))
+    print('%s v%s, %s' % (__uname__, __version__, __long_name__))
     print('%s <%s>' % (__author__, __email__))
     print(__license__)
     sys.exit(0)
 
 
+def write_text(text, desc=sys.stdout, color=None):
+    'Write the text with color, if tty'
+    if color is not None and desc.isatty():
+        desc.write('\x1b[%sm%s\x1b[0m' % (color, text))
+    else:
+        desc.write(text)
+
+
 def shell_arguments():
     'Parse the arguments'
-    parser = OptionParser()
-
-    parser.add_option('-u', '--username', action='store', type='string',
-            dest='username', help='username', metavar='U', default='Anonymous')
+    usage = "usage: %prog [options] file1 file2 ..."
+    parser = OptionParser(usage=usage, version="%prog " + __version__)
 
     # Print information
-    info = OptionGroup(parser, 'Print information')
-
-    info.add_option('-v', '--verbose', action='store_true',
+    parser.add_option('-v', '--verbose', action='store_true',
             dest='verbose', help='be extra verbose', default=False)
 
-    info.add_option('-a', '--authors', action='callback',
+    parser.add_option('-a', '--authors', action='callback',
             callback=show_authors, help='show authors')
 
-    parser.add_option_group(info)
     return parser
 
 
@@ -145,7 +148,7 @@ def find_subtitles(finput):
 
 def convert_video(finput):
     'Convert the AVI video to matroska'
-    logging.info('Trying to convert %s file', finput)
+    logging.info('Trying to convert %s', finput)
 
     finput_without_ext = os.path.splitext(finput)[0]
     foutput = finput_without_ext + '.mkv'
@@ -163,17 +166,13 @@ def convert_video(finput):
     sys.stdout.flush()
 
 
-def write_text(text, desc=sys.stdout, color=None):
-    'Write the text with color, if tty'
-    if color is not None and desc.isatty():
-        desc.write('\x1b[%sm%s\x1b[0m' % (color, text))
-    else:
-        desc.write(text)
-
-
 if __name__ == '__main__':
     arg_parser = shell_arguments()
     (options, paths) = arg_parser.parse_args()
+
+    if not paths:
+        print('Try with -h to see the help')
+        sys.exit(0)
 
     # Configure the logging module
     if options.verbose:
@@ -190,10 +189,8 @@ if __name__ == '__main__':
         print('You need the mkvmerge command to run this script')
         sys.exit(-1)
 
-    # If no files are provided, use the actual directory
-    paths = paths or '.'
-
     for path in paths:
+        logging.info('Looking for all the avi files in %s', path)
         analyze_path(path)
 
 # vim: ai ts=4 sts=4 et sw=4
