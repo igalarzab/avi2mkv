@@ -24,8 +24,8 @@ import sys
 
 
 # Global information
-__name__ = 'savi2mkv'
-__long_name__ = 'Simple AVI to MKV'
+__uname__ = 'savi2mkv'
+__long_name__ = 'Simple AVI to MKV converter'
 __version__ = '0.1dev'
 __author__ = 'Jose Ignacio Galarza'
 __email__ = 'igalarzab@gmail.com'
@@ -62,8 +62,8 @@ def shell_arguments():
 
 
 if __name__ == 'savi2mkv':
-    parser = shell_arguments()
-    (options, args) = parser.parse_args()
+    arg_parser = shell_arguments()
+    (options, arguments) = arg_parser.parse_args()
 
     # Configure the logging module
     if options.verbose:
