@@ -11,7 +11,7 @@ Simple script to transform an AVI video to MKV.
 What I need.
 =============
 
-To use PhotoShare, you need at least:
+To use savi2mkv, you need at least:
 
 * Python (>=2.7)
 * mkvtools
