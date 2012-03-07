@@ -1,0 +1,9 @@
+2012-03-07  Jose Ignacio Galarza  <igalarzab@grail.com>
+
+* Finished v0.1
+* Very simple way of handling subtitles.
+* Take all the AVI files of a list of directories.
+* Or take all the files passed by the command line.
+* Verbose mode with a lot of information.
+* Created the setuptools script.
+* Created the documentation.
