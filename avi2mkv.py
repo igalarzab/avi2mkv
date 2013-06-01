@@ -28,12 +28,16 @@ from optparse import OptionParser
 
 # Global information
 __uname__ = 'avi2mkv'
-__long_name__ = 'Simple AVI to MKV converter'
-__version__ = '0.1'
+__long_name__ = 'Simple AVI/MP4 to MKV converter'
+__version__ = '1.0'
 __author__ = 'Jose Ignacio Galarza'
 __email__ = 'igalarzab@gmail.com'
 __url__ = 'http://github.com/igalarzab/avi2mkv'
-__license__ = 'GNU/GPLv3'
+__license__ = 'MIT'
+
+# Colors (ANSI)
+RED = '31'
+GREEN = '32'
 
 
 def show_authors(*args, **kwargs):
@@ -60,11 +64,16 @@ def shell_arguments():
     parser = OptionParser(usage=usage, version="%prog " + __version__)
 
     # Print information
-    parser.add_option('-v', '--verbose', action='store_true',
-            dest='verbose', help='be extra verbose', default=False)
+    parser.add_option('-d', '--debug',
+                      action='store_true',
+                      dest='debug',
+                      help='be extra verbose',
+                      default=False)
 
-    parser.add_option('-a', '--authors', action='callback',
-            callback=show_authors, help='show authors')
+    parser.add_option('-a', '--authors',
+                      action='callback',
+                      callback=show_authors,
+                      help='show authors')
 
     return parser
 
@@ -80,12 +89,12 @@ def check_mkvmerge():
 
 
 def analyze_path(obj):
-    'Get all the AVIs of the obj (path or file)'
+    'Get all the videos of the obj (path or file)'
     ab_path = os.path.abspath(obj)
 
     # Check if the path exists
     if not os.path.exists(ab_path):
-        write_text('[E]', color='31')
+        write_text('[E]', color=RED)
         write_text(' The file "%s" doesn\'t exists\n' % obj)
         return False
 
@@ -93,7 +102,11 @@ def analyze_path(obj):
     if os.path.isfile(ab_path):
         convert_video(ab_path)
     elif os.path.isdir(ab_path):
-        for f in glob.glob(ab_path + '/*.avi'):
+        for f in glob.glob(ab_path + r'/*.avi'):
+            abs_f = os.path.join(ab_path, f)
+            if os.path.isfile(abs_f):
+                convert_video(abs_f)
+        for f in glob.glob(ab_path + r'/*.mp4'):
             abs_f = os.path.join(ab_path, f)
             if os.path.isfile(abs_f):
                 convert_video(abs_f)
@@ -105,7 +118,9 @@ def language_code(lang):
     'Get the language code'
     values = {
         'spanish': 'es',
-        'english': 'en'
+        'english': 'en',
+        'french': 'fr',
+        'german': 'de',
     }
 
     return values.get(lang.lower(), None)
@@ -117,7 +132,8 @@ def find_subtitles(finput):
     languages = []
 
     for f in files:
-        language = f[len(finput):-4].strip()
+        language = f[len(finput):-4].strip().strip('.')
+
         if language:
             languages.append([language_code(language), language, f])
             logging.info('Found a subtitle with the name "%s"', language)
@@ -150,14 +166,14 @@ def create_command(iname, oname, subtitles):
 
 
 def convert_video(finput):
-    'Convert the AVI video to matroska'
+    'Convert the found videos to matroska'
     logging.info('Trying to convert %s', finput)
 
     finput_without_ext = os.path.splitext(finput)[0]
     foutput = finput_without_ext + '.mkv'
 
     if os.path.exists(foutput):
-        write_text('[E]', color='31')
+        write_text('[E]', color=RED)
         write_text(' The destine "%s" already exists\n' % foutput)
         return False
 
@@ -169,14 +185,15 @@ def convert_video(finput):
     c = subprocess.call(command, stdout=subprocess.PIPE)
 
     if c == 0:
-        write_text('\r[X]\n', sys.stdout, '32')
+        write_text('\r[X]\n', sys.stdout, GREEN)
     else:
-        write_text('\r[E]\n', sys.stdout, '31')
+        write_text('\r[E]\n', sys.stdout, RED)
 
     return c == 0
 
 
-if __name__ == '__main__':
+def main():
+    'Entry point'
     arg_parser = shell_arguments()
     (options, paths) = arg_parser.parse_args()
 
@@ -185,14 +202,14 @@ if __name__ == '__main__':
         sys.exit(0)
 
     # Configure the logging module
-    if options.verbose:
+    if options.debug:
         level = logging.INFO
     else:
         level = logging.WARNING
 
     logging.basicConfig(level=level,
-        format='%(asctime)s %(levelname)s: %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S')
+                        format='%(asctime)s %(levelname)s: %(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%S')
 
     if not check_mkvmerge():
         print('mkvtoolnix is not installed in your system')
@@ -200,7 +217,11 @@ if __name__ == '__main__':
         sys.exit(-1)
 
     for path in paths:
-        logging.info('Looking for all the avi files in %s', path)
+        logging.info('Looking for all the avi/mp4 files in %s', path)
         analyze_path(path)
+
+
+if __name__ == '__main__':
+    main()
 
 # vim: ai ts=4 sts=4 et sw=4
