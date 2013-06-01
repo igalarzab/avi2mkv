@@ -1,34 +1,42 @@
 from setuptools import setup, find_packages
 
-import avi2mkv
+__uname__ = 'avi2mkv'
+__long_name__ = 'Simple AVI to MKV converter'
+__version__ = '1.0'
+__author__ = 'Jose Ignacio Galarza'
+__email__ = 'igalarzab@gmail.com'
+__url__ = 'http://github.com/igalarzab/avi2mkv'
+__license__ = 'MIT'
 
 setup(
-    name=avi2mkv.__uname__,
-    version=avi2mkv.__version__,
+    name=__uname__,
+    version=__version__,
+    packages=find_packages(),
+
+    author=__author__,
+    author_email=__email__,
     description="Simple AVI to MKV converter",
-    long_description='\n'.join([open('README.rst').read()]),
+    long_description='\n'.join([open('README.md').read()]),
+    license=__license__,
+    url=__url__,
+    keywords='conversor,avi,mkv,simple',
 
     classifiers=[
-        "Development Status :: 4 - Beta",
+        'Development Status :: 5 - Production/Stable',
         "Environment :: Console",
-        "License :: OSI Approved :: GNU General Public License (GPL)",
+        'License :: OSI Approved :: MIT License',
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 3",
         "Topic :: Multimedia :: Sound/Audio :: Conversion",
     ],
-    keywords='conversor,avi,mkv,simple',
 
-    author=avi2mkv.__author__,
-    author_email=avi2mkv.__email__,
-    url=avi2mkv.__url__,
-    license=avi2mkv.__license__,
-
-    packages=find_packages(),
+    py_modules=['avi2mkv'],
     include_package_data=True,
-    zip_safe=False,
     install_requires=[],
-    scripts = ['avi2mkv'],
+    entry_points={
+        'console_scripts': ['avi2mkv = avi2mkv:main']
+    },
 )
 
 # vim: ai ts=4 sts=4 et sw=4
