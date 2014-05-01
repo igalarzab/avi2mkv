@@ -149,7 +149,6 @@ def find_subtitles(path):
     files = glob.glob(path + '*.srt')
     languages = []
 
-    print path + '*.srt'
     for filename in files:
         language = filename[len(path):-4].strip().strip('.')
 
@@ -180,8 +179,12 @@ def create_command(input_filename, output_filename, subtitles):
             command.append('--language')
             command.append('0:%s' % subtitle[0])
 
+        command.append('--sub-charset')
+        command.append('0:UTF-8')
+
         command.append('--track-name')
-        command.append('0:%s' % subtitle[1])
+        command.append('0:"%s"' % subtitle[1])
+
         command.append(subtitle[2])
 
     logging.info(command)
