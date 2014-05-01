@@ -41,7 +41,9 @@ GREEN = '32'
 
 
 def show_authors(*args, **kwargs):
-    'Show authors'
+    """
+    Show authors
+    """
     print('%s v%s, %s' % (__uname__, __version__, __long_name__))
     print('%s <%s>' % (__author__, __email__))
     print(__license__)
@@ -49,7 +51,9 @@ def show_authors(*args, **kwargs):
 
 
 def write_text(text, desc=sys.stdout, color=None):
-    'Write the text with color, if tty'
+    """
+    Write the text with color, if tty
+    """
     if color is not None and desc.isatty():
         desc.write('\x1b[%sm%s\x1b[0m' % (color, text))
     else:
@@ -59,27 +63,35 @@ def write_text(text, desc=sys.stdout, color=None):
 
 
 def shell_arguments():
-    'Parse the arguments'
+    """
+    Configure optparse
+    """
     usage = "usage: %prog [options] file1 file2 ..."
     parser = OptionParser(usage=usage, version="%prog " + __version__)
 
     # Print information
-    parser.add_option('-d', '--debug',
-                      action='store_true',
-                      dest='debug',
-                      help='be extra verbose',
-                      default=False)
+    parser.add_option(
+        '-d', '--debug',
+        action='store_true',
+        dest='debug',
+        help='be extra verbose',
+        default=False
+    )
 
-    parser.add_option('-a', '--authors',
-                      action='callback',
-                      callback=show_authors,
-                      help='show authors')
+    parser.add_option(
+        '-a', '--authors',
+        action='callback',
+        callback=show_authors,
+        help='show authors'
+    )
 
     return parser
 
 
 def check_mkvmerge():
-    'Check if mkvmerge is installed'
+    """
+    Check if mkvmerge is installed
+    """
     try:
         subprocess.check_call(['mkvmerge', '-V'], stdout=subprocess.PIPE)
     except OSError:
@@ -88,26 +100,28 @@ def check_mkvmerge():
     return True
 
 
-def analyze_path(obj):
-    'Get all the videos of the obj (path or file)'
-    ab_path = os.path.abspath(obj)
+def analyze_path(path):
+    """
+    Get all the videos of the path (directory or file)
+    """
+    absolute_path = os.path.abspath(path)
 
     # Check if the path exists
-    if not os.path.exists(ab_path):
+    if not os.path.exists(absolute_path):
         write_text('[E]', color=RED)
-        write_text(' The file "%s" doesn\'t exists\n' % obj)
+        write_text(" The file '%s' doesn't exists\n" % path)
         return False
 
     # If it's a file, convert it directly; otherwise, transverse the dir
-    if os.path.isfile(ab_path):
-        convert_video(ab_path)
-    elif os.path.isdir(ab_path):
-        for f in glob.glob(ab_path + r'/*.avi'):
-            abs_f = os.path.join(ab_path, f)
+    if os.path.isfile(absolute_path):
+        convert_video(absolute_path)
+    elif os.path.isdir(absolute_path):
+        for f in glob.glob(absolute_path + r'/*.avi'):
+            abs_f = os.path.join(absolute_path, f)
             if os.path.isfile(abs_f):
                 convert_video(abs_f)
-        for f in glob.glob(ab_path + r'/*.mp4'):
-            abs_f = os.path.join(ab_path, f)
+        for f in glob.glob(absolute_path + r'/*.mp4'):
+            abs_f = os.path.join(absolute_path, f)
             if os.path.isfile(abs_f):
                 convert_video(abs_f)
 
@@ -115,7 +129,9 @@ def analyze_path(obj):
 
 
 def language_code(lang):
-    'Get the language code'
+    """
+    Get the language code from the language name
+    """
     values = {
         'spanish': 'es',
         'english': 'en',
@@ -126,62 +142,71 @@ def language_code(lang):
     return values.get(lang.lower(), None)
 
 
-def find_subtitles(finput):
-    'Find all the subtitles of the video'
-    files = glob.glob(finput + '*.srt')
+def find_subtitles(path):
+    """
+    Find all the subtitles of the video
+    """
+    files = glob.glob(path + '*.srt')
     languages = []
 
-    for f in files:
-        language = f[len(finput):-4].strip().strip('.')
+    print path + '*.srt'
+    for filename in files:
+        language = filename[len(path):-4].strip().strip('.')
 
         if language:
-            languages.append([language_code(language), language, f])
-            logging.info('Found a subtitle with the name "%s"', language)
+            languages.append([language_code(language), language, filename])
+            logging.info("Found a subtitle with the name '%s'", language)
 
     return languages
 
 
-def create_command(iname, oname, subtitles):
-    'Creathe the mkvmerge command'
+def create_command(input_filename, output_filename, subtitles):
+    """
+    Create the mkvmerge command
+    """
     command = ['mkvmerge']
 
     # Append the output file
     command.append('-o')
-    command.append(oname)
+    command.append(output_filename)
 
     # Append the input file
-    command.append(iname)
+    command.append(input_filename)
 
     # Create the subtitles
     for subtitle in subtitles:
+
         if subtitle[0]:
             command.append('--language')
             command.append('0:%s' % subtitle[0])
+
         command.append('--track-name')
         command.append('0:%s' % subtitle[1])
         command.append(subtitle[2])
 
     logging.info(command)
+
     return command
 
 
-def convert_video(finput):
-    'Convert the found videos to matroska'
-    logging.info('Trying to convert %s', finput)
+def convert_video(path):
+    """
+    Convert the found videos to matroska
+    """
+    logging.info("Trying to convert %s", path)
 
-    finput_without_ext = os.path.splitext(finput)[0]
-    foutput = finput_without_ext + '.mkv'
+    path_without_ext = os.path.splitext(path)[0]
+    output_filename = path_without_ext + '.mkv'
 
-    if os.path.exists(foutput):
+    if os.path.exists(output_filename):
         write_text('[E]', color=RED)
-        write_text(' The destine "%s" already exists\n' % foutput)
+        write_text(" The destine '%s' already exists\n" % output_filename)
         return False
 
-    subs = find_subtitles(finput_without_ext)
+    subs = find_subtitles(path_without_ext)
+    command = create_command(path, output_filename, subs)
 
-    command = create_command(finput, foutput, subs)
-
-    write_text('[ ] Converting %s' % finput)
+    write_text('[ ] Converting %s' % path)
     c = subprocess.call(command, stdout=subprocess.PIPE)
 
     if c == 0:
@@ -193,7 +218,9 @@ def convert_video(finput):
 
 
 def main():
-    'Entry point'
+    """
+    Entry point
+    """
     arg_parser = shell_arguments()
     (options, paths) = arg_parser.parse_args()
 
@@ -207,9 +234,11 @@ def main():
     else:
         level = logging.WARNING
 
-    logging.basicConfig(level=level,
-                        format='%(asctime)s %(levelname)s: %(message)s',
-                        datefmt='%Y-%m-%d %H:%M:%S')
+    logging.basicConfig(
+        level=level,
+        format='%(asctime)s %(levelname)s: %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
 
     if not check_mkvmerge():
         print('mkvtoolnix is not installed in your system')
@@ -223,5 +252,6 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 
 # vim: ai ts=4 sts=4 et sw=4
