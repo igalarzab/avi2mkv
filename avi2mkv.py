@@ -152,9 +152,11 @@ def find_subtitles(path):
     for filename in files:
         language = filename[len(path):-4].strip().strip('.')
 
-        if language:
-            languages.append([language_code(language), language, filename])
-            logging.info("Found a subtitle with the name '%s'", language)
+        if not language:
+            language = 'unknown'
+
+        languages.append([language_code(language), language, filename])
+        logging.info("Found a subtitle with the name '%s'", language)
 
     return languages
 
