@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 __uname__ = 'avi2mkv'
 __long_name__ = 'Simple AVI to MKV converter'
-__version__ = '1.0'
+__version__ = '1.1'
 __author__ = 'Jose Ignacio Galarza'
 __email__ = 'igalarzab@gmail.com'
 __url__ = 'http://github.com/igalarzab/avi2mkv'
