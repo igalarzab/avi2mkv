@@ -185,7 +185,7 @@ def create_command(input_filename, output_filename, subtitles):
         command.append('0:UTF-8')
 
         command.append('--track-name')
-        command.append('0:"%s"' % subtitle[1])
+        command.append('0:%s' % subtitle[1])
 
         command.append(subtitle[2])
 
